@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetCare - Sistema Veterinário</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient sticky-top shadow-sm">
+        <div class="container-lg">
+            <a class="navbar-brand fw-bold" href="javascript:void(0)">
+                <i class="bi bi-paw"></i> PetCare
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="nav-link">Olá, <strong>{{ session.usuario }}</strong>!</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="bi bi-box-arrow-right"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-lg py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-1">
+                    <h1 class="mb-0"><i class="bi bi-hospital"></i> Clínica Veterinária</h1>
+                </div>
+                <p class="text-muted">Gerencie os pacientes de sua clínica</p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'warning' if category == 'warning' else 'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <!-- Formulário de Cadastro -->
+            <div class="col-lg-5 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-gradient text-white">
+                        <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Cadastrar Novo Paciente</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('cadastrar') }}" method="POST" class="needs-validation">
+                            <div class="mb-3">
+                                <label for="tutor" class="form-label">Nome do Tutor <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="tutor" name="tutor" placeholder="Ex: João Silva" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="animal" class="form-label">Nome do Animal <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="animal" name="animal" placeholder="Ex: Rex" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="especie" class="form-label">Espécie <span class="text-danger">*</span></label>
+                                <select class="form-control" id="especie" name="especie" required>
+                                    <option value="">Selecione uma espécie</option>
+                                    <option value="Cachorro">Cachorro</option>
+                                    <option value="Gato">Gato</option>
+                                    <option value="Coelho">Coelho</option>
+                                    <option value="Hamster">Hamster</option>
+                                    <option value="Pássaro">Pássaro</option>
+                                    <option value="Réptil">Réptil</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="idade" class="form-label">Idade (anos) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="idade" name="idade" placeholder="Ex: 3" min="0" max="50" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                                <i class="bi bi-check-circle"></i> Cadastrar Paciente
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Pacientes -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-gradient text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-list-check"></i> Pacientes Cadastrados ({{ pacientes|length }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if pacientes %}
+                            <div class="list-group list-group-flush">
+                                {% for p in pacientes %}
+                                    <div class="list-group-item border-0 border-bottom pb-3 mb-3">
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <div class="badge bg-info-subtle text-info rounded-pill me-2">
+                                                        <i class="bi bi-heart"></i> {{ p['especie'] }}
+                                                    </div>
+                                                    <strong class="fs-5">{{ p['animal'] }}</strong>
+                                                </div>
+                                                <p class="mb-1 text-muted small">
+                                                    <i class="bi bi-person"></i> Tutor: <strong>{{ p['tutor'] }}</strong>
+                                                </p>
+                                                <p class="mb-0 text-muted small">
+                                                    <i class="bi bi-calendar"></i> Idade: <strong>{{ p['idade'] }} ano(s)</strong>
+                                                </p>
+                                            </div>
+                                            <div class="col-auto">
+                                                <form action="{{ url_for('deletar', paciente_id=p['id']) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja deletar este paciente?');">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Deletar paciente">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                <p class="text-muted mt-3">Nenhum paciente cadastrado ainda.</p>
+                                <p class="text-muted small">Comece adicionando um novo paciente ao lado.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
